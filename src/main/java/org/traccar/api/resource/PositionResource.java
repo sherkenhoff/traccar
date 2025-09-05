@@ -17,9 +17,11 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.helper.model.PositionUtil;
+import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.CsvExportProvider;
 import org.traccar.reports.GpxExportProvider;
@@ -46,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Path("positions")
@@ -179,6 +182,47 @@ public class PositionResource extends BaseResource {
         };
         return Response.ok(stream)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.gpx").build();
+    }
+
+    @Path("radius")
+    @GET
+    public Stream<Position> getPositionsWithinRadius(
+            @QueryParam("latitude") double latitude,
+            @QueryParam("longitude") double longitude,
+            @QueryParam("radius") double radius,
+            @QueryParam("deviceId") Long deviceId,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+
+        // Validate parameters
+        if (radius <= 0) {
+            throw new WebApplicationException("Radius must be greater than 0", Response.Status.BAD_REQUEST);
+        }
+
+        // Check permissions if deviceId is provided
+        if (deviceId != null) {
+            permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        } else {
+            // If no specific device is provided, get only positions for devices the user has access to
+            var devices = storage.getObjects(Device.class, new Request(
+                    new Columns.Include("id"),
+                    new Condition.Permission(User.class, getUserId(), Device.class)));
+
+            // Get positions for all accessible devices and filter them after
+            Stream<Position> positionStream = PositionUtil.getPositionsWithinRadius(
+                    storage, latitude, longitude, radius, null, from, to);
+
+            var deviceIds = devices.stream().map(BaseModel::getId).collect(Collectors.toUnmodifiableSet());
+            return positionStream.filter(position -> deviceIds.contains(position.getDeviceId()));
+        }
+
+        // Check date range permissions
+        if (from != null && to != null) {
+            permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        }
+
+        // Use the utility method to search within radius
+        return PositionUtil.getPositionsWithinRadius(storage, latitude, longitude, radius, deviceId, from, to);
     }
 
 }

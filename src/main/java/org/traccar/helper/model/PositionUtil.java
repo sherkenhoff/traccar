@@ -95,4 +95,11 @@ public final class PositionUtil {
                 .toList();
     }
 
+    public static Stream<Position> getPositionsWithinRadius(
+            Storage storage, double latitude, double longitude, double radius,
+            Long deviceId, Date from, Date to) throws StorageException {
+        Condition condition = new Condition.WithinRadius(latitude, longitude, radius, deviceId, from, to);
+        return storage.getObjectsStream(Position.class, new Request(new Columns.All(), condition));
+    }
+
 }

@@ -236,6 +236,21 @@ public class DatabaseStorage extends Storage {
             if (condition.getDeviceId() > 0) {
                 results.add(condition.getDeviceId());
             }
+        } else if (genericCondition instanceof Condition.WithinRadius condition) {
+            if (condition.getDeviceId() != null) {
+                results.add(condition.getDeviceId());
+            }
+
+            if (condition.getFrom() != null && condition.getTo() != null) {
+                results.add(condition.getFrom());
+                results.add(condition.getTo());
+            }
+
+            // Add the parameters for the Haversine formula
+            results.add(condition.getLatitude());
+            results.add(condition.getLongitude());
+            results.add(condition.getLatitude());
+            results.add(condition.getRadius());
         }
         return results;
     }
@@ -296,6 +311,28 @@ public class DatabaseStorage extends Storage {
                 }
                 result.append(")");
 
+            } else if (genericCondition instanceof Condition.WithinRadius condition) {
+
+                StringBuilder whereBuilder = new StringBuilder();
+
+                if (condition.getDeviceId() != null) {
+                    whereBuilder.append("deviceId = ? ");
+                }
+
+                if (condition.getFrom() != null && condition.getTo() != null) {
+                    if (whereBuilder.length() > 0) {
+                        whereBuilder.append("AND ");
+                    }
+                    whereBuilder.append("fixTime BETWEEN ? AND ? ");
+                }
+
+                if (whereBuilder.length() > 0) {
+                    result.append("(").append(whereBuilder).append(") AND ");
+                }
+
+                // Use the Haversine formula directly in SQL to filter by distance
+                result.append("(6371000 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) "
+                                   + "- radians(?)) + sin(radians(?)) * sin(radians(latitude)))) <= ?");
             }
         }
         return result.toString();

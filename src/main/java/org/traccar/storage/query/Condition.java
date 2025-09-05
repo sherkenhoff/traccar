@@ -190,4 +190,47 @@ public interface Condition {
         }
     }
 
+    class WithinRadius implements Condition {
+        private final double latitude;
+        private final double longitude;
+        private final double radius;
+        private final Long deviceId;
+        private final java.util.Date from;
+        private final java.util.Date to;
+
+        public WithinRadius(double latitude, double longitude, double radius,
+                            Long deviceId, java.util.Date from, java.util.Date to) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.radius = radius;
+            this.deviceId = deviceId;
+            this.from = from;
+            this.to = to;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public double getRadius() {
+            return radius;
+        }
+
+        public Long getDeviceId() {
+            return deviceId;
+        }
+
+        public java.util.Date getFrom() {
+            return from;
+        }
+
+        public java.util.Date getTo() {
+            return to;
+        }
+    }
+
 }
