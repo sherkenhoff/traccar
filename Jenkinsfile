@@ -7,6 +7,14 @@ pipeline {
         }
     }
     stages {
+        stage('Checkout') {
+            steps {
+                // Checkout main repo and submodules
+                checkout scm
+                sh 'git submodule update --init --recursive'
+            }
+        }
+        
         stage('Check Dependencies') {
             steps {
                 script {
