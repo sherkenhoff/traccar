@@ -68,7 +68,7 @@ pipeline {
                         if [ -d "${libPath}" ]; then
                         cp -r ${libPath} target/dist/
                         fi
-                        cd target && tar czvf traccar-dist.tgz dist
+                        cd target && tar czf traccar-dist.tgz dist
                     """
 
                     archiveArtifacts artifacts: 'target/traccar-dist.tgz', fingerprint: true
