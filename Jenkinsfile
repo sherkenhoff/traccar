@@ -25,7 +25,7 @@ pipeline {
                         recursiveSubmodules: true,
                         trackingSubmodules: false]
                     ],
-                    userRemoteConfigs: [[url: 'https://github.com/sherkenhoff/traccar-web.git']]
+                    userRemoteConfigs: [[url: 'https://github.com/sherkenhoff/traccar.git']]
                 ])
             }
         }
