@@ -16,7 +16,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: "*/${env.BRANCH_NAME}"]],
+                    branches: scm.branches,
                     doGenerateSubmoduleConfigurations: false,
                     extensions: [
                         [$class: 'SubmoduleOption',
@@ -25,7 +25,7 @@ pipeline {
                         recursiveSubmodules: true,
                         trackingSubmodules: false]
                     ],
-                    userRemoteConfigs: [[url: 'https://github.com/sherkenhoff/traccar.git']]
+                    userRemoteConfigs: scm.userRemoteConfigs
                 ])
             }
         }
