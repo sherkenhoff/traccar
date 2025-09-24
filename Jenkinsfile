@@ -6,12 +6,27 @@ pipeline {
             args '-v $HOME/.gradle:/home/jenkins/.gradle'
         }
     }
+    
+    options {
+        skipDefaultCheckout()
+    }
+    
     stages {
         stage('Checkout') {
             steps {
-                // Checkout main repo and submodules
-                checkout scm
-                sh 'git submodule update --init --recursive'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${env.BRANCH_NAME}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [
+                        [$class: 'SubmoduleOption',
+                        disableSubmodules: false,
+                        parentCredentials: true,
+                        recursiveSubmodules: true,
+                        trackingSubmodules: false]
+                    ],
+                    userRemoteConfigs: [[url: 'https://github.com/sherkenhoff/traccar-web.git']]
+                ])
             }
         }
         
