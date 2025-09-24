@@ -30,6 +30,17 @@ pipeline {
             }
         }
         
+        stage('Debug Checkout') {
+            steps {
+                script {
+                    sh '''
+                        git log --oneline -n 3
+                        cd traccar-web && git log --oneline -n 3
+                    '''
+                }
+            }
+        }
+        
         stage('Check Dependencies') {
             steps {
                 script {
