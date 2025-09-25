@@ -100,13 +100,13 @@ pipeline {
             withCredentials([string(credentialsId: 'traccar2-deploy-webhook', variable: 'DEPLOY_TOKEN')]) {
                 script {
                     def artifactUrl = "${env.BUILD_URL}artifact/target/traccar-dist.tgz"
-                    sh """
+                    sh '''
                         curl -X POST \
                             -H "Content-Type: application/json" \
-                            -H "X-Deploy-Token: ${DEPLOY_TOKEN}" \
-                            -d '{"artifactUrl":"${artifactUrl}"}' \
+                            -H "X-Deploy-Token: $DEPLOY_TOKEN" \
+                            -d '{"artifactUrl":"''' + artifactUrl + '''"}' \
                             https://www.herkenhoff.rocks/hooks/deploy-traccar2
-                    """
+                    '''
                 }
             }
         }
