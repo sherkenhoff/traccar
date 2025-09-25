@@ -18,8 +18,7 @@ pipeline {
                     checkout scm
                     sh '''
                         git submodule init
-                        git submodule update --remote --recursive
-                        git submodule status --recursive
+                        git submodule update --remote --recursive --force
                     '''
                 }
             }
