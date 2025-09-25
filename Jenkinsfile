@@ -56,6 +56,7 @@ pipeline {
             steps {
                 sh '''
                     cd traccar-web
+                    sleep 1800
                     rm -rf node_modules
                     npm cache clean --force
                     npm ci
