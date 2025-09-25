@@ -60,6 +60,7 @@ pipeline {
             steps {
                 sh '''
                     cd traccar-web
+                    sleep 1800
                     npm ci
                     npm run build
                 '''
