@@ -23,7 +23,7 @@ pipeline {
             }
         }
 
-        stage('Builds') {
+        stage('Build Traccar JAR') {
             agent {
                 docker {
                     label 'docker && linux'
@@ -31,37 +31,43 @@ pipeline {
                     args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
                 }
             }
-            stage('Build Traccar JAR') {
-                steps {
-                    sh '''
-                    if ! command -v java >/dev/null 2>&1; then
-                        echo "Java is not installed!" >&2
+            steps {
+                sh '''
+                if ! command -v java >/dev/null 2>&1; then
+                    echo "Java is not installed!" >&2
+                exit 1
+                fi
+                if [ ! -f "./gradlew" ]; then
+                    echo "Gradle wrapper (./gradlew) is missing!" >&2
                     exit 1
-                    fi
-                    if [ ! -f "./gradlew" ]; then
-                        echo "Gradle wrapper (./gradlew) is missing!" >&2
-                        exit 1
-                    fi
-                    ./gradlew assemble
-                    '''
+                fi
+                ./gradlew assemble
+                '''
+            }
+        }
+
+        stage('Build Web') {
+            agent {
+                docker {
+                    label 'docker && linux'
+                    image 'eclipse-temurin:17-jdk'
+                    args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
                 }
             }
-            stage('Build Web') {
-                when {
-                    changeset 'traccar-web'
-                }
-                steps {
-                    sh '''
-                        # install node & npm (if not cached in container)
-                        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-                        apt-get update
-                        apt-get install -y nodejs
+            when {
+                changeset 'traccar-web'
+            }
+            steps {
+                sh '''
+                    # install node & npm (if not cached in container)
+                    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                    apt-get update
+                    apt-get install -y nodejs
 
-                        cd traccar-web
-                        npm ci
-                        npm run build
-                    '''
-                }
+                    cd traccar-web
+                    npm ci
+                    npm run build
+                '''
             }
         }
 
