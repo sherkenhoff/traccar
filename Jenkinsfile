@@ -23,28 +23,6 @@ pipeline {
             }
         }
 
-        stage('Check Dependencies') {
-            agent {
-                docker {
-                    label 'docker && linux'
-                    image 'eclipse-temurin:17-jdk'
-                    args '-v $HOME/.gradle:/home/jenkins/.gradle'
-                }
-            }
-            steps {
-                sh '''
-                    if ! command -v java >/dev/null 2>&1; then
-                        echo "Java is not installed!" >&2
-                        exit 1
-                    fi
-                    if [ ! -f "./gradlew" ]; then
-                        echo "Gradle wrapper (./gradlew) is missing!" >&2
-                        exit 1
-                    fi
-                '''
-            }
-        }
-
         stage('Builds') {
             parallel {
                 stage('Build Java') {
@@ -52,11 +30,21 @@ pipeline {
                         docker {
                             label 'docker && linux'
                             image 'eclipse-temurin:17-jdk'
-                            args '-v $HOME/.gradle:/home/jenkins/.gradle'
+                            args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE}"
                         }
                     }
                     steps {
-                        sh './gradlew assemble'
+                        sh '''
+                        if ! command -v java >/dev/null 2>&1; then
+                            echo "Java is not installed!" >&2
+                        exit 1
+                        fi
+                        if [ ! -f "./gradlew" ]; then
+                            echo "Gradle wrapper (./gradlew) is missing!" >&2
+                            exit 1
+                        fi
+                        ./gradlew assemble
+                        '''
                     }
                 }
 
@@ -68,7 +56,7 @@ pipeline {
                         docker {
                             label 'docker && linux'
                             image 'node:20-alpine'
-                            args '-v $HOME/.npm:/home/node/.npm'
+                            args "-v $HOME/.npm:/home/node/.npm -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE}/traccar-web"
                         }
                     }
                     steps {
