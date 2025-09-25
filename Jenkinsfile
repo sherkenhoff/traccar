@@ -3,7 +3,7 @@ pipeline {
         docker {
             label 'docker && linux'
             image 'traccar-build:latest'
-            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle'
         }
     }
     
@@ -56,13 +56,12 @@ pipeline {
         }
 
         stage('Build Web') {
-            when {
-                changeset 'traccar-web'
-            }
+            // when {
+            //     changeset 'traccar-web'
+            // }
             steps {
                 sh '''
                     cd traccar-web
-                    npm config set cache /home/jenkins/.npm
                     npm ci
                     npm run build
                 '''
