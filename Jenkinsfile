@@ -30,13 +30,10 @@ pipeline {
             }
         }
         
-        stage('Debug Checkout') {
+        stage('Debug') {
             steps {
                 script {
-                    sh '''
-                        git log --oneline -n 3
-                        cd traccar-web && git log --oneline -n 3
-                    '''
+                    sh 'sleep 300'
                 }
             }
         }
