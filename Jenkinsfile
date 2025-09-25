@@ -24,15 +24,15 @@ pipeline {
         }
 
         stage('Builds') {
+            agent {
+                docker {
+                    label 'docker && linux'
+                    image 'eclipse-temurin:17-jdk'
+                    args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
+                }
+            }
             parallel {
-                stage('Build Java') {
-                    agent {
-                        docker {
-                            label 'docker && linux'
-                            image 'eclipse-temurin:17-jdk'
-                            args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
-                        }
-                    }
+                stage('Build Traccar JAR') {
                     steps {
                         sh '''
                         if ! command -v java >/dev/null 2>&1; then
@@ -47,23 +47,21 @@ pipeline {
                         '''
                     }
                 }
-
                 stage('Build Web') {
                     when {
                         changeset 'traccar-web'
                     }
-                    agent {
-                        docker {
-                            label 'docker && linux'
-                            image 'node:20-alpine'
-                            args "-v $HOME/.npm:/home/node/.npm -v ${WORKSPACE}:${WORKSPACE}"
-                        }
-                    }
                     steps {
-                        dir('traccar-web') {
-                            sh 'npm ci'
-                            sh 'npm run build'
-                        }
+                        sh '''
+                            # install node & npm (if not cached in container)
+                            curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                            apt-get update
+                            apt-get install -y nodejs
+
+                            cd traccar-web
+                            npm ci
+                            npm run build
+                        '''
                     }
                 }
             }
@@ -86,7 +84,7 @@ pipeline {
                     """
 
                     // Web app (if built)
-                    if (fileExists('traccar-web/dist')) {
+                    if (fileExists('traccar-web/build/index.html')) {
                         sh 'cp -r traccar-web/build target/dist/web'
                     }
 
