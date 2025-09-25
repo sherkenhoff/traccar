@@ -2,4 +2,3 @@
 	path = traccar-web
 	url = ../traccar-web.git
 	branch = add-radius-search
-	ignore = all
