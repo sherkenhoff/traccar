@@ -49,6 +49,7 @@ pipeline {
                 stage('Build Java') {
                     agent {
                         docker {
+                            label 'docker && linux'
                             image 'eclipse-temurin:17-jdk'
                             args '-v $HOME/.gradle:/home/jenkins/.gradle'
                         }
@@ -64,6 +65,7 @@ pipeline {
                     }
                     agent {
                         docker {
+                            label 'docker && linux'
                             image 'node:20-alpine'
                             args '-v $HOME/.npm:/home/node/.npm'
                         }
