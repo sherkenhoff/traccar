@@ -15,29 +15,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Checkout main repository
                     checkout scm
-                    
-                    // Initialize and update submodules to their correct HEAD revision
                     sh '''
-                        echo "=== Initializing and updating submodules ==="
                         git submodule init
                         git submodule update --remote --recursive
-                        
-                        echo "=== Submodule status ==="
                         git submodule status --recursive
-                        
-                        # Verify traccar-web submodule is checked out correctly
-                        if [ -d "traccar-web" ]; then
-                            echo "✓ traccar-web submodule exists"
-                            cd traccar-web
-                            echo "Current HEAD: $(git rev-parse HEAD)"
-                            echo "Current branch/ref: $(git describe --always --all)"
-                            cd ..
-                        else
-                            echo "✗ traccar-web submodule missing!"
-                            exit 1
-                        fi
                     '''
                 }
             }
