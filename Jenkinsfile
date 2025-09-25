@@ -12,7 +12,6 @@ pipeline {
     }
     
     environment {
-        HOME = "/home/jenkins"
         GRADLE_USER_HOME = "${HOME}/.gradle"
     }
     
