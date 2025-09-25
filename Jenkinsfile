@@ -3,7 +3,7 @@ pipeline {
         docker {
             label 'docker && linux'
             image 'traccar-build:latest'
-            args '-v $HOME/.gradle:/home/jenkins/.gradle'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/.npm'
         }
     }
     
@@ -57,8 +57,6 @@ pipeline {
                 sh '''
                     cd traccar-web
                     sleep 1800
-                    rm -rf node_modules
-                    npm cache clean --force
                     npm ci
                     npm run build
                 '''
