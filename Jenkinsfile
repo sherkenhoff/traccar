@@ -62,7 +62,7 @@ pipeline {
             steps {
                 sh '''
                     cd traccar-web
-                    rm -rf node_modules package-lock.json
+                    rm -rf node_modules
                     npm cache clean --force
                     npm ci
                     npm run build
