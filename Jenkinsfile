@@ -30,14 +30,6 @@ pipeline {
             }
         }
         
-        stage('Debug') {
-            steps {
-                script {
-                    sh 'sleep 300'
-                }
-            }
-        }
-        
         stage('Check Dependencies') {
             steps {
                 script {
