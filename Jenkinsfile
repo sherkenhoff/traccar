@@ -30,7 +30,7 @@ pipeline {
                         docker {
                             label 'docker && linux'
                             image 'eclipse-temurin:17-jdk'
-                            args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE}"
+                            args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
                         }
                     }
                     steps {
@@ -56,7 +56,7 @@ pipeline {
                         docker {
                             label 'docker && linux'
                             image 'node:20-alpine'
-                            args "-v $HOME/.npm:/home/node/.npm -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE}/traccar-web"
+                            args "-v $HOME/.npm:/home/node/.npm -v ${WORKSPACE}:${WORKSPACE}"
                         }
                     }
                     steps {
