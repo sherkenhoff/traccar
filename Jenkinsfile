@@ -26,6 +26,7 @@ pipeline {
         stage('Check Dependencies') {
             agent {
                 docker {
+                    label 'docker && linux'
                     image 'eclipse-temurin:17-jdk'
                     args '-v $HOME/.gradle:/home/jenkins/.gradle'
                 }
