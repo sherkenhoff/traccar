@@ -2,8 +2,8 @@ pipeline {
     agent {
         docker {
             label 'docker && linux'
-            image 'eclipse-temurin:17-jdk'
-            args '-v $HOME/.gradle:/home/jenkins/.gradle'
+            image 'traccar-build:latest'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm'
         }
     }
     
@@ -61,12 +61,8 @@ pipeline {
             }
             steps {
                 sh '''
-                    # install node & npm (if not cached in container)
-                    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-                    apt-get update
-                    apt-get install -y nodejs
-
                     cd traccar-web
+                    npm config set cache /home/jenkins/.npm
                     npm ci
                     npm run build
                 '''
