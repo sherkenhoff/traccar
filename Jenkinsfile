@@ -11,6 +11,11 @@ pipeline {
         skipDefaultCheckout()
     }
     
+    environment {
+        HOME = "/home/jenkins"
+        GRADLE_USER_HOME = "${HOME}/.gradle"
+    }
+    
     stages {
         stage('Checkout') {
             steps {
