@@ -54,9 +54,9 @@ pipeline {
         }
 
         stage('Build Web') {
-            // when {
-            //     changeset 'traccar-web'
-            // }
+            when {
+                changeset 'traccar-web'
+            }
             steps {
                 sh '''
                     cd traccar-web
