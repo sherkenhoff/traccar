@@ -3,7 +3,7 @@ pipeline {
         docker {
             label 'docker && linux'
             image 'traccar-build:latest'
-            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm --memory=2g --cpus=2.0'
         }
     }
     
