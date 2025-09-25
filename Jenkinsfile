@@ -1,9 +1,16 @@
 pipeline {
-    agent { label 'linux && docker' }
+    agent {
+        docker {
+            label 'docker && linux'
+            image 'eclipse-temurin:17-jdk'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle'
+        }
+    }
+    
     options {
         skipDefaultCheckout()
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -11,49 +18,44 @@ pipeline {
                     $class: 'GitSCM',
                     branches: scm.branches,
                     doGenerateSubmoduleConfigurations: false,
-                    extensions: [[
-                        $class: 'SubmoduleOption',
+                    extensions: [
+                        [$class: 'SubmoduleOption',
                         disableSubmodules: false,
                         parentCredentials: true,
                         recursiveSubmodules: true,
-                        trackingSubmodules: false
-                    ]],
+                        trackingSubmodules: false]
+                    ],
                     userRemoteConfigs: scm.userRemoteConfigs
                 ])
             }
         }
-
-        stage('Build Traccar JAR') {
-            agent {
-                docker {
-                    label 'docker && linux'
-                    image 'eclipse-temurin:17-jdk'
-                    args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
+        
+        stage('Check Dependencies') {
+            steps {
+                script {
+                    sh '''
+                        if ! command -v java >/dev/null 2>&1; then
+                            echo "Java is not installed!" >&2
+                            exit 1
+                        fi
+                        if [ ! -f "./gradlew" ]; then
+                            echo "Gradle wrapper (./gradlew) is missing!" >&2
+                            exit 1
+                        fi
+                    '''
                 }
             }
+        }
+
+        stage('Build Traccar Server JAR') {
             steps {
-                sh '''
-                if ! command -v java >/dev/null 2>&1; then
-                    echo "Java is not installed!" >&2
-                exit 1
-                fi
-                if [ ! -f "./gradlew" ]; then
-                    echo "Gradle wrapper (./gradlew) is missing!" >&2
-                    exit 1
-                fi
-                ./gradlew assemble
-                '''
+                script {
+                    sh './gradlew assemble'
+                }
             }
         }
 
         stage('Build Web') {
-            agent {
-                docker {
-                    label 'docker && linux'
-                    image 'eclipse-temurin:17-jdk'
-                    args "-v $HOME/.gradle:/home/jenkins/.gradle -v ${WORKSPACE}:${WORKSPACE}"
-                }
-            }
             when {
                 changeset 'traccar-web'
             }
@@ -73,29 +75,22 @@ pipeline {
 
         stage('Archive Distribution') {
             steps {
-                sh 'mkdir -p target/dist'
-
                 script {
-                    // Java JAR + libs
+                    sh 'mkdir -p target/dist'
+
                     def jarPath = fileExists('build/libs/tracker-server.jar') ? 'build/libs/tracker-server.jar' : 'target/tracker-server.jar'
                     def libPath = fileExists('build/libs') ? 'build/libs' : 'target/lib'
 
                     sh """
                         cp ${jarPath} target/dist/
                         if [ -d "${libPath}" ]; then
-                            cp -r ${libPath} target/dist/
+                        cp -r ${libPath} target/dist/
                         fi
+                        cd target && tar czf traccar-dist.tgz dist
                     """
 
-                    // Web app (if built)
-                    if (fileExists('traccar-web/build/index.html')) {
-                        sh 'cp -r traccar-web/build target/dist/web'
-                    }
-
-                    sh 'cd target && tar czf traccar-dist.tgz dist'
+                    archiveArtifacts artifacts: 'target/traccar-dist.tgz', fingerprint: true
                 }
-
-                archiveArtifacts artifacts: 'target/traccar-dist.tgz', fingerprint: true
             }
         }
     }
