@@ -69,6 +69,7 @@ pipeline {
         stage('Archive Distribution') {
             steps {
                 script {
+                    sh "sleep 1800"
                     sh 'mkdir -p target/dist'
 
                     def jarPath = fileExists('build/libs/tracker-server.jar') ? 'build/libs/tracker-server.jar' : 'target/tracker-server.jar'
