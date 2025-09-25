@@ -1,12 +1,11 @@
 pipeline {
-    agent none
+    agent { label 'linux && docker' }
     options {
         skipDefaultCheckout()
     }
 
     stages {
         stage('Checkout') {
-            agent { label 'linux' }
             steps {
                 checkout([
                     $class: 'GitSCM',
@@ -27,7 +26,6 @@ pipeline {
         stage('Check Dependencies') {
             agent {
                 docker {
-                    label 'docker && linux'
                     image 'eclipse-temurin:17-jdk'
                     args '-v $HOME/.gradle:/home/jenkins/.gradle'
                 }
@@ -51,7 +49,6 @@ pipeline {
                 stage('Build Java') {
                     agent {
                         docker {
-                            label 'docker && linux'
                             image 'eclipse-temurin:17-jdk'
                             args '-v $HOME/.gradle:/home/jenkins/.gradle'
                         }
@@ -67,7 +64,6 @@ pipeline {
                     }
                     agent {
                         docker {
-                            label 'docker && linux'
                             image 'node:20-alpine'
                             args '-v $HOME/.npm:/home/node/.npm'
                         }
@@ -83,7 +79,6 @@ pipeline {
         }
 
         stage('Archive Distribution') {
-            agent { label 'linux' }
             steps {
                 sh 'mkdir -p target/dist'
 
