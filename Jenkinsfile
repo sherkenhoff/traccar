@@ -60,6 +60,7 @@ pipeline {
             steps {
                 sh '''
                     cd traccar-web
+                    rm -rf build
                     npm ci --max-old-space-size=2048
                     npm run build
                 '''
