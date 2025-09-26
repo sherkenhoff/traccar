@@ -69,13 +69,13 @@ pipeline {
         stage('Archive Distribution') {
             steps {
                 script {
-                    sh 'mkdir -p target/dist'
-
                     def jarPath = fileExists('build/libs/tracker-server.jar') ? 'build/libs/tracker-server.jar' : 'target/tracker-server.jar'
                     def libPath = fileExists('build/libs') ? 'build/libs' : 'target/lib'
                     def webPath = fileExists('traccar-web/build/index.html') ? 'traccar-web/build' : ''
 
                     sh """
+                        rm -rf target/dist
+                        mkdir -p target/dist
                         cp ${jarPath} target/dist/
                         if [ -d "${libPath}" ]; then
                             cp -r ${libPath} target/dist/
