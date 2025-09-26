@@ -3,7 +3,7 @@ pipeline {
         docker {
             label 'docker && linux'
             image 'traccar-build:latest'
-            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm --memory=2g --cpus=2.0'
+            args '-v $HOME/.gradle:/home/jenkins/.gradle -v $HOME/.npm:/home/jenkins/.npm --memory=4g --cpus=2.0'
         }
     }
     
@@ -54,13 +54,13 @@ pipeline {
         }
 
         stage('Build Web') {
-            when {
-                changeset 'traccar-web'
-            }
+            //when {
+            //    changeset 'traccar-web'
+            //}
             steps {
                 sh '''
                     cd traccar-web
-                    npm ci
+                    npm ci --max-old-space-size=2048
                     npm run build
                 '''
             }
