@@ -23,6 +23,10 @@ pipeline {
                     sh '''
                         git submodule init
                         git submodule update --remote --recursive --force
+                        echo "=== Workspace contents ==="
+                        ls -l
+                        echo "=== traccar/ subdir contents ==="
+                        ls -l traccar-web
                     '''
                 }
             }
